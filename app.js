@@ -4,11 +4,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
-/* const encrypt = require("mongoose-encryption");
-  const md5 = require("md5");
-  const bcrypt = require("bcrypt");
-  const saltRounds = 10;
-*/
 const session = require('express-session');
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
@@ -17,14 +12,12 @@ const findOrCreate = require("mongoose-findorcreate");
 
 const app = express();
 
-// console.log(process.env.API_KEY);
-
 app.use(express.static("public"));
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended : true}));
 
 app.use(session({
-  secret : "Our Little Secret.",
+  secret : "Our little Secret.",
   resave : false,
   saveUninitialized : false
 }));
@@ -32,7 +25,9 @@ app.use(session({
 app.use(passport.initialize());     //initializing passport
 app.use(passport.session());
 
-mongoose.connect("mongodb+srv://admin_panther:<Prince8954>@cluster0.tjugp.mongodb.net/userDB", {useNewUrlParser: true});
+mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true});
+ // mongoose.connect("mongodb+srv://admin_prince:<Prince7852>@cluster0.tm4hw.mongodb.net/userDB", {useNewUrlParser: true});
+
 mongoose.set("useCreateIndex", true);
 
 const userSchema = new mongoose.Schema({
@@ -41,8 +36,6 @@ const userSchema = new mongoose.Schema({
   googleId : String,
   secret : String
 });
-
-// userSchema.plugin(encrypt, {secret: secret, encryptedFields: ['password']});
 
 userSchema.plugin(passportLocalMongoose);      //setting passport-local-mongoose
 userSchema.plugin(findOrCreate);
@@ -65,7 +58,7 @@ passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
     callbackURL: "http://localhost:3000/auth/google/secrets",
-    userProficeURL: "https://www.google.com/oauth2/v3/userinfo"        //for avoiding deprecation from gooogle plus
+    userProficeURL: "https://www.googleapis.com/oauth2/v3/userinfo"        //for avoiding deprecation from gooogle plus
   },
   function(accessToken, refreshToken, profile, cb) {
     // console.log(profile);
