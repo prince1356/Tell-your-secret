@@ -22,11 +22,10 @@ app.use(session({
   saveUninitialized : false
 }));
 
-app.use(passport.initialize());     //initializing passport
+app.use(passport.initialize());
 app.use(passport.session());
 
 mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true});
- // mongoose.connect("mongodb+srv://admin_prince:<Prince7852>@cluster0.tm4hw.mongodb.net/userDB", {useNewUrlParser: true});
 
 mongoose.set("useCreateIndex", true);
 
@@ -37,7 +36,7 @@ const userSchema = new mongoose.Schema({
   secret : String
 });
 
-userSchema.plugin(passportLocalMongoose);      //setting passport-local-mongoose
+userSchema.plugin(passportLocalMongoose);
 userSchema.plugin(findOrCreate);
 
 const User = new mongoose.model("User", userSchema);
@@ -57,11 +56,10 @@ passport.deserializeUser(function(id, done) {
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/secrets",
-    userProficeURL: "https://www.googleapis.com/oauth2/v3/userinfo"        //for avoiding deprecation from gooogle plus
+    callbackURL: process.env.CALL_BACK_URL,
+    userProficeURL: process.env.USER_PROFILE
   },
   function(accessToken, refreshToken, profile, cb) {
-    // console.log(profile);
 
     User.findOrCreate({ googleId: profile.id }, function (err, user) {
       return cb(err, user);
@@ -115,9 +113,6 @@ app.get("/submit", function(req,res){
 app.post("/submit", function(req,res){
   const submittedSecret = req.body.secret;
 
-  //Once the user is authenticated and their session gets saved, their user details are saved to req.user.
-  // console.log(req.user.id);
-
   User.findById(req.user.id,function(err,foundUser){
     if(err){
       console.log(err);
@@ -168,8 +163,6 @@ app.get("/logout",function(req,res){
   req.logout();
   res.redirect("/");
 });
-
-
 
 app.listen(3000, function(){
   console.log("Server started on port 3000.")
